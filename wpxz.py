@@ -8,30 +8,35 @@ version: 0.0.1
 """
 
 from pathlib import Path
+import logging
 
 from aligo import Aligo
 
-def get_file_list(aly_path):
-    file_list = ali.get_file_list(aly_path)
-    all_files_name = []
-    for file in file_list:
-        if file.type == 'file':
-            all_files_name.append(file.name)
+def get_folder_list(base_folder):
+    folder_list = ali.get_file_list(ali.get_folder_by_path(base_folder).file_id)
+    return folder_list
 
-def download_file(files, local_path):
+def download_files(file_list, local_path):
     if isinstance(local_path, str):
         local_path = Path(local_path)
     if not local_path.exists():
         local_path.mkdir(parents=True)
-
-    ali.download_files(files=files, local_folder=local_path)
-
-    # if file.type == 'file':
-    #     ali.download_file(file=file, local_folder=local_path)
-    # else:
-    #     ali.download_folder(file.file_id, local_folder=local_path)
+     
+    try:
+        ali.download_files(files=file_list, local_folder=local_path)
+    except Exception as e:
+        logging.basicConfig(filename='wpxz.log', encoding='utf-8', level=logging.ERROR)
+        logging.error(e)
 
 if __name__ == '__main__':
     ali = Aligo()
-    files = get_file_list('电视剧/海贼王')
-    download_file(files, '/home/demo/Downloads/海贼王')
+    # Get folder list under 'Offline' directory on aliyundrive.
+    folder_list = get_folder_list('Offline-test')
+    for folder in folder_list:
+        if folder.type == 'folder':
+            folder_id = folder.file_id
+            folder_name = folder.name
+            file_list = ali.get_file_list(folder_id)
+            local_path = Path.home() / 'Downloads' / folder_name
+            print(file_list)
+            download_files(file_list, local_path)
