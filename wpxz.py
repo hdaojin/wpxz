@@ -22,15 +22,19 @@ def download_files(file_list, local_path):
     if not local_path.exists():
         local_path.mkdir(parents=True)
      
-    try:
-        ali.download_files(files=file_list, local_folder=local_path)
-    except Exception as e:
-        logging.basicConfig(filename='wpxz.log', encoding='utf-8', level=logging.ERROR)
-        logging.error(e)
+    ali.download_files(files=file_list, local_folder=local_path)
+
+def save_log():
+    logging.basicConfig(filename='wpxz.log',
+                        filemode='w', 
+                        encoding='utf-8', 
+                        format='%(asctime)s - %(module)s - %(levelname)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
 
 if __name__ == '__main__':
     ali = Aligo()
-    # Get folder list under 'Offline' directory on aliyundrive.
+    save_log()
+    # Get folder list under 'Offline-test' directory on aliyundrive.
     folder_list = get_folder_list('Offline-test')
     for folder in folder_list:
         if folder.type == 'folder':

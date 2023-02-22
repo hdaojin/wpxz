@@ -10,29 +10,43 @@ Version: 0.0.1
 from pathlib import Path
 import logging
 
+import click
 from aligo import Aligo
 
 def sync_files(local_path, aliy_path):
-    # Create local directory if it does not exist.
-    if isinstance(local_path, str):
-        local_path = Path(local_path)
-    if not local_path.exists():
-        local_path.mkdir(parents=True)
-
     # Get the file_id of the directory on aliyundrive.
-    aliy_folder_id = ali.get_folder_by_path(aliy_path).file_id
-
     try:
-        # Sync files between local and aliyundrive. `False` means clould-base.
-        ali.sync_folder(local_path, aliy_folder_id, False)
+        aliy_folder_id = ali.get_folder_by_path(aliy_path).file_id
     except Exception as e:
-        logging.basicConfig(filename='wptb.log', encoding='utf-8', level=logging.ERROR)
         logging.error(e)
+        return
 
+    # Sync files between local and aliyundrive. `False` means clould-base; `True` means local-base; `None` means two-way sync.
+    ali.sync_folder(local_path, aliy_folder_id, False)
+
+def save_log():
+    logging.basicConfig(filename='wptb.log',
+                        filemode='w', 
+                        encoding='utf-8', 
+                        format='%(asctime)s - %(module)s - %(levelname)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+
+
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('aliy_path', required=True)
+@click.argument('local_path', required=True, type=click.Path(exists=True,dir_okay=True,file_okay=False,writable=True), nargs=1)
+def main(local_path, aliy_path):
+    """
+    Automatically sync files between aliyundrive and local.
+
+    ALIY_PATH: The path of the directory on aliyundrive.
+    LOCAL_PATH: The path of the directory on local.
+    """
+    sync_files(local_path, aliy_path)
+    
 
 if __name__ == '__main__':
     ali = Aligo()
-    # Sync files between 'Offline' directory on aliyundrive and local.
-    local_path = Path.home() / 'Downloads'
-    aliy_path = 'Offline'
-    sync_files(local_path, aliy_path)
+    save_log()
+    main()
