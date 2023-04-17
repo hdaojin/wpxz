@@ -1,3 +1,9 @@
 #!/bin/bash
 
-source /home/demo/GitHub/wpxz/.venv/bin/activate  &&  python3 /home/demo/GitHub/wpxz/aliy_signin.py
+source_dir="/home/pi/GitHub/hdaojin/wpxz"
+
+source $source_dir/.venv/bin/activate  &&  python3 $source_dir/aliy_signin.py
+
+sleep 10
+
+python3 $source_dir/aliy_download.py 
